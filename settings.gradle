@@ -1,0 +1,3 @@
+rootProject.name = "template-webapp-spring-boot-and-react"
+
+include "server"

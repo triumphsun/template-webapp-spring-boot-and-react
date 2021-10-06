@@ -1,0 +1,64 @@
+plugins {
+	id 'org.springframework.boot' version '2.5.5'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id "java"
+}
+
+repositories {
+	mavenCentral()
+}
+
+sourceSets {
+	integrationTest {
+		compileClasspath += sourceSets.main.output
+		runtimeClasspath += sourceSets.main.output
+	}
+}
+
+configurations {
+	integrationTestImplementation.extendsFrom implementation
+	integrationTestRuntimeOnly.extendsFrom runtimeOnly
+}
+
+dependencies {
+
+	// production
+	implementation "io.springfox:springfox-swagger2:${swaggerVersion}"
+	implementation "io.springfox:springfox-swagger-ui:${swaggerVersion}"
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// test
+	testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+	testImplementation "org.mockito:mockito-all:${mockitoVersion}"
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// integrationTest
+	integrationTestImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+	integrationTestRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+	integrationTestImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+java {
+	sourceCompatibility "1.8"
+	targetCompatibility "1.8"
+
+	test {
+		useJUnitPlatform()
+	}
+}
+
+tasks.register('integrationTest', Test) {
+	description = 'Runs integration tests.'
+	group = 'verification'
+
+	testClassesDirs = sourceSets.integrationTest.output.classesDirs
+	classpath = sourceSets.integrationTest.runtimeClasspath
+
+	it.useJUnitPlatform()
+	it.shouldRunAfter(tasks.named("test"))
+}
+
+tasks.named("check") {
+	it.dependsOn(tasks.named("integrationTest"))
+}
